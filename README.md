@@ -74,7 +74,7 @@ Butuh bantuan lebih? Cek [dokumen resmi Google](https://ai.google.dev/tutorials/
 1. **Clone Repo**
 
    ```bash
-   git clone [repo-url]
+   git clone https://github.com/NurdinMTopan/ai-cs.git
    cd ai-cs
    ```
 
@@ -88,9 +88,9 @@ Butuh bantuan lebih? Cek [dokumen resmi Google](https://ai.google.dev/tutorials/
    Buat file `.env` di root project dan isi dengan:
 
    ```env
-   DATABASE_URL="file:./dev.db"  # SQLite (default)
+   DATABASE_URL="mysql://root:@localhost:3306/ai_cs_whatsapp_db"  # MongoDB (default)
    GOOGLE_API_KEY="your-google-genai-api-key"  # Untuk Gemini
-   SESSION_KEY="your-secret-key"  # Opsional untuk session
+   PORT="3000"  # Opsional untuk PORT
    ```
 
 4. **Setup Database**  
