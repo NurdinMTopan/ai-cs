@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Mengambil URL dari file .env
+}
+
+// Model untuk Produk Digital
+model Produk {
+  id        Int      @id @default(autoincrement())
+  nama      String   @db.VarChar(255)
+  jenis     String   @db.VarChar(50) // Misal: Ebook, Kelas Online, Template
+  deskripsi String?  @db.Text // Deskripsi bisa panjang, jadi pakai Text
+  harga     Int?     @db.Int() @default(0)
+  link      String?  @db.VarChar(255) // Link ke produk (download, halaman sales)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Model untuk History Chat WhatsApp
+model ChatHistory {
+  id         Int      @id @default(autoincrement())
+  sessionId  String   @db.VarChar(100) // Nomor HP Pengirim (misal: 6281234567890@c.us)
+  userMessage String   @db.Text
+  aiResponse String?  @db.Text // Jawaban dari AI bisa jadi null jika ada error
+  timestamp  DateTime @default(now())
+
+  @@index([sessionId]) // Index untuk pencarian cepat berdasarkan sessionId
+}

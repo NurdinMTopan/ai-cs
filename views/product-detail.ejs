@@ -1,0 +1,179 @@
+<div class="container mx-auto p-4 max-w-3xl">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-700">Detail Produk</h1>
+    <div class="flex space-x-2">
+      <a
+        href="/produk/list"
+        class="flex items-center text-blue-500 hover:text-blue-700"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Kembali ke Daftar
+      </a>
+    </div>
+  </div>
+
+  <% if (product) { %>
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class { %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="border-b border-gray-200">
+          <div class="px-6 py-5 flex items-center">
+            <div class="flex-1">
+              <h3 class="text-lg leading-6 font-medium text-gray-900">
+                <%= product.nama %>
+              </h3>
+              <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                <span
+                  class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <%= product.jenis === 'Ebook' ? 'bg-blue-100 text-blue-800' : product.jenis === 'Kelas Online' ? 'bg-green-100 text-green-800' : product.jenis === 'Template' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800' %>"
+                >
+                  <%= product.jenis %>
+                </span>
+              </p>
+            </div>
+            <div class="flex space-x-2">
+              <a
+                href="/produk/edit/<%= product.id %>"
+                class="inline-flex items-center px-3 py-1.5 border border-yellow-300 shadow-sm text-sm font-medium rounded text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="-ml-0.5 mr-1.5 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Edit
+              </a>
+              <a
+                href="/produk/hapus/<%= product.id %>"
+                class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="-ml-0.5 mr-1.5 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Hapus
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-5">
+          <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div class="sm:col-span-1">
+              <dt class="text-sm font-medium text-gray-500">Nama Produk</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= product.nama %></dd>
+            </div>
+            <div class="sm:col-span-1">
+              <dt class="text-sm font-medium text-gray-500">Jenis</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= product.jenis %></dd>
+            </div>
+            <div class="sm:col-span-1">
+              <dt class="text-sm font-medium text-gray-500">Harga</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= product.harga ? `Rp
+                ${product.harga.toLocaleString('id-ID')}` : `${product.harga}`
+                %>
+              </dd>
+            </div>
+            <div class="sm:col-span-1">
+              <dt class="text-sm font-medium text-gray-500">Link Produk</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <% if (product.link) { %>
+                <a
+                  href="<%= product.link %>"
+                  target="_blank"
+                  class="text-blue-600 hover:text-blue-900 flex items-center"
+                >
+                  <span class="mr-1">Buka Link</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+                <% } else { %>
+                <span class="text-gray-400">-</span>
+                <% } %>
+              </dd>
+            </div>
+            <div class="sm:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
+              <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">
+                <%= product.deskripsi || 'Tidak ada deskripsi' %>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+      <% } else { %>
+      <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">
+          Produk tidak ditemukan
+        </h3>
+        <p class="mt-1 text-sm text-gray-500">
+          Produk yang Anda cari tidak tersedia atau telah dihapus.
+        </p>
+        <div class="mt-6">
+          <a
+            href="/produk/list"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Kembali ke Daftar Produk
+          </a>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>

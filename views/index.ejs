@@ -1,0 +1,411 @@
+<div class="container mx-auto p-4 md:p-8">
+  <h1 class="text-3xl font-bold mb-6 text-center text-gray-700">
+    Dashboard AI CS WhatsApp
+  </h1>
+
+  <div class="bg-white p-6 rounded-lg shadow-md flex flex-col h-[80vh]">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Tes Chat AI</h2>
+
+    <!-- Chat history container -->
+    <div
+      id="chatContainer"
+      class="flex-1 w-full p-3 bg-gray-50 border border-gray-200 rounded-md overflow-y-auto mb-4 flex flex-col gap-3 custom-scrollbar"
+    >
+      <% if (history && history.length > 0) { %> <% history.forEach(message => {
+      %> <% if (message.userMessage) { %>
+      <div class="user-message">
+        <p><%= message.userMessage %></p>
+      </div>
+      <% } %> <% if (message.aiResponse) { %>
+      <div class="ai-message">
+        <div class="ai-formatted-message" data-raw="<%- message.aiResponse %>">
+          <p><%= message.aiResponse %></p>
+          <!-- fallback buat non-JS -->
+        </div>
+      </div>
+      <% } %> <% }); %> <% } else { %>
+      <div class="ai-message">
+        <div class="ai-formatted-message" data-raw="<%- message.aiResponse %>">
+          <p><%= message.aiResponse %></p>
+          <!-- fallback buat non-JS -->
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <form id="chatForm" class="mb-4">
+      <div class="mb-3">
+        <label
+          for="userMessage"
+          class="block text-sm font-medium text-gray-600 mb-1"
+          >Pesan Anda:</label
+        >
+        <textarea
+          id="userMessage"
+          name="message"
+          rows="1"
+          style="max-height: 200px; overflow-y: auto; resize: none"
+          class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="Ketik pertanyaan Anda di sini..."
+        ></textarea>
+      </div>
+      <div class="flex justify-between items-center">
+        <button
+          type="submit"
+          id="sendButton"
+          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-5 rounded-md transition duration-200 ease-in-out disabled:opacity-50"
+        >
+          Kirim ke AI
+        </button>
+        <button
+          type="button"
+          id="resetMemoryButton"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded-md transition duration-200 ease-in-out disabled:opacity-50"
+        >
+          Reset Memori Tes
+        </button>
+      </div>
+    </form>
+
+    <div>
+      <p id="loadingIndicator" class="text-sm text-gray-500 mt-2 hidden">
+        Memproses...
+      </p>
+      <p id="resetStatus" class="text-sm text-green-600 mt-2 hidden"></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .user-message {
+    background-color: #e2f7ff;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+    padding: 0.75rem 1rem;
+    margin-left: auto;
+    max-width: 80%;
+    align-self: flex-end;
+  }
+  .ai-message {
+    background-color: #f0f0f0;
+    border-radius: 1rem 1rem 1rem 0.25rem;
+    padding: 0.75rem 1rem;
+    margin-right: auto;
+    max-width: 80%;
+    align-self: flex-start;
+  }
+  .ai-formatted-message p {
+    margin-bottom: 0.75rem;
+  }
+  .ai-formatted-message p:last-child {
+    margin-bottom: 0;
+  }
+  .ai-formatted-message ul,
+  .ai-formatted-message ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .ai-formatted-message ul {
+    list-style-type: disc;
+  }
+  .ai-formatted-message ol {
+    list-style-type: decimal;
+  }
+  .ai-formatted-message a {
+    color: #3b82f6;
+    text-decoration: underline;
+  }
+  .ai-formatted-message code {
+    background-color: #e5e7eb;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+  }
+  .ai-formatted-message pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin-bottom: 0.75rem;
+  }
+  .ai-formatted-message pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  .ai-formatted-message strong {
+    font-weight: 600;
+  }
+  .ai-formatted-message em {
+    font-style: italic;
+  }
+</style>
+
+<script>
+  const chatForm = document.getElementById("chatForm");
+  const userMessageInput = document.getElementById("userMessage");
+  const chatContainer = document.getElementById("chatContainer");
+  const sendButton = document.getElementById("sendButton");
+  const resetMemoryButton = document.getElementById("resetMemoryButton");
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  const resetStatus = document.getElementById("resetStatus");
+
+  /**
+   * Format AI response with enhanced styling
+   * @param {string} text - The raw AI response text
+   * @returns {string} - Formatted HTML
+   */
+  function formatAIResponse(text) {
+    if (!text) return "";
+
+    // Step 1: Escape HTML to prevent XSS
+    let formattedText = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    // Step 2: Convert line breaks to paragraphs
+    formattedText =
+      "<p>" +
+      formattedText.replace(/\n\n+/g, "</p><p>").replace(/\n/g, "<br>") +
+      "</p>";
+
+    // Step 3: Format lists
+    // Unordered lists
+    formattedText = formattedText.replace(
+      /<p>(\s*[-*•]\s+.*?)<\/p>/gs,
+      function (match, listItems) {
+        const items = listItems
+          .split(/\n(?=\s*[-*•]\s+)/g)
+          .map((item) => {
+            return "<li>" + item.replace(/^\s*[-*•]\s+/, "") + "</li>";
+          })
+          .join("");
+        return "<ul>" + items + "</ul>";
+      }
+    );
+
+    // Ordered lists
+    formattedText = formattedText.replace(
+      /<p>(\s*\d+\.\s+.*?)<\/p>/gs,
+      function (match, listItems) {
+        const items = listItems
+          .split(/\n(?=\s*\d+\.\s+)/g)
+          .map((item) => {
+            return "<li>" + item.replace(/^\s*\d+\.\s+/, "") + "</li>";
+          })
+          .join("");
+        return "<ol>" + items + "</ol>";
+      }
+    );
+
+    // Step 4: Format URLs as links
+    formattedText = formattedText.replace(
+      /(https?:\/\/[^\s<]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+    // Step 5: Format code blocks
+    formattedText = formattedText.replace(
+      /```([^`]+)```/g,
+      "<pre><code>$1</code></pre>"
+    );
+
+    // Step 6: Format inline code
+    formattedText = formattedText.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Step 7: Format bold text
+    formattedText = formattedText.replace(
+      /\*\*([^*]+)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+    // Step 8: Format italic text
+    formattedText = formattedText.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+    return formattedText;
+  }
+
+  // === Auto-expand textarea ===
+  const autoResizeTextarea = (el) => {
+    el.style.height = "auto";
+    const maxHeight = 144;
+    const newHeight = el.scrollHeight;
+
+    el.style.overflowY = newHeight > maxHeight ? "auto" : "hidden";
+    el.style.height = Math.min(newHeight, maxHeight) + "px";
+  };
+
+  userMessageInput.addEventListener("input", () => {
+    autoResizeTextarea(userMessageInput);
+  });
+
+  // === Enter to send, Shift+Enter to newline ===
+  userMessageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Cegah newline biasa
+      chatForm.requestSubmit(); // Submit form
+    }
+  });
+
+  // Function to add a user message to the chat container
+  function addUserMessage(message) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "user-message";
+
+    const messagePara = document.createElement("p");
+    messagePara.textContent = message;
+    messageDiv.appendChild(messagePara);
+
+    chatContainer.appendChild(messageDiv);
+
+    // Scroll to the bottom of the chat container
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  // Function to add an AI message to the chat container
+  function addAIMessage(message) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "ai-message";
+
+    const formattedDiv = document.createElement("div");
+    formattedDiv.className = "ai-formatted-message";
+    formattedDiv.innerHTML = formatAIResponse(message);
+    messageDiv.appendChild(formattedDiv);
+
+    chatContainer.appendChild(messageDiv);
+
+    // Scroll to the bottom of the chat container
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  // Ensure chat is scrolled to bottom on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const aiMessages = document.querySelectorAll(".ai-formatted-message");
+
+    aiMessages.forEach((el) => {
+      const raw = el.dataset.raw;
+      if (raw) {
+        el.innerHTML = formatAIResponse(raw);
+      }
+    });
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  });
+
+  // Handle pengiriman chat
+  chatForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Mencegah reload halaman standar form
+    const message = userMessageInput.value.trim();
+    if (!message) return; // Jangan kirim jika kosong
+
+    // Add user message to chat
+    addUserMessage(message);
+
+    // Tampilkan loading & disable tombol
+    loadingIndicator.classList.remove("hidden");
+    sendButton.disabled = true;
+    resetMemoryButton.disabled = true;
+    resetStatus.classList.add("hidden"); // Sembunyikan status reset
+
+    // Add temporary AI "thinking" message
+    const thinkingDiv = document.createElement("div");
+    thinkingDiv.className = "ai-message";
+    thinkingDiv.id = "ai-thinking";
+    const thinkingText = document.createElement("p");
+    thinkingText.textContent = "Memproses...";
+    thinkingDiv.appendChild(thinkingText);
+    chatContainer.appendChild(thinkingDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    try {
+      const response = await fetch("/chat-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: message }),
+      });
+
+      if (!response.ok) {
+        // Tangani error dari server
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Remove the thinking message
+      const thinkingMessage = document.getElementById("ai-thinking");
+      if (thinkingMessage) {
+        chatContainer.removeChild(thinkingMessage);
+      }
+
+      // Add AI response to chat using the formatter
+      addAIMessage(data.reply);
+    } catch (error) {
+      console.error("Error sending chat:", error);
+
+      // Remove the thinking message
+      const thinkingMessage = document.getElementById("ai-thinking");
+      if (thinkingMessage) {
+        chatContainer.removeChild(thinkingMessage);
+      }
+
+      // Add error message to chat
+      addAIMessage(`Error: ${error.message}`);
+    } finally {
+      // Sembunyikan loading & enable tombol
+      loadingIndicator.classList.add("hidden");
+      sendButton.disabled = false;
+      resetMemoryButton.disabled = false;
+      userMessageInput.value = ""; // Kosongkan input setelah kirim
+      userMessageInput.style.height = "auto";
+    }
+  });
+
+  // Handle reset memori
+  resetMemoryButton.addEventListener("click", async () => {
+    // Tampilkan loading & disable tombol
+    loadingIndicator.classList.remove("hidden");
+    loadingIndicator.textContent = "Mereset memori...";
+    sendButton.disabled = true;
+    resetMemoryButton.disabled = true;
+    resetStatus.classList.add("hidden"); // Sembunyikan status reset lama
+
+    try {
+      const response = await fetch("/reset-memory", {
+        method: "POST", // Method POST untuk aksi yang mengubah data (menghapus)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      resetStatus.textContent = data.message; // Tampilkan pesan sukses
+      resetStatus.classList.remove("hidden");
+
+      // Clear chat history and add welcome message
+      chatContainer.innerHTML = "";
+      addAIMessage("Memori tes telah direset. Silakan mulai percakapan baru.");
+    } catch (error) {
+      console.error("Error resetting memory:", error);
+      resetStatus.textContent = `Error: ${error.message}`; // Tampilkan pesan error
+      resetStatus.classList.remove("hidden");
+      resetStatus.classList.replace("text-green-600", "text-red-600"); // Ubah warna jadi merah
+    } finally {
+      // Sembunyikan loading & enable tombol
+      loadingIndicator.classList.add("hidden");
+      loadingIndicator.textContent = "Memproses..."; // Kembalikan teks loading
+      sendButton.disabled = false;
+      resetMemoryButton.disabled = false;
+    }
+  });
+</script>

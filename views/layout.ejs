@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - AI CS WhatsApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              sidebar: {
+                DEFAULT: "#f8fafc",
+                foreground: "#334155",
+                border: "#e2e8f0",
+                accent: "#f1f5f9",
+                "accent-foreground": "#0f172a",
+                ring: "#94a3b8",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      /* Custom scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      /* Sidebar styles */
+      .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        transition: transform 0.3s ease;
+        z-index: 50;
+      }
+
+      .sidebar-collapsed {
+        transform: translateX(-200px);
+      }
+
+      .sidebar-header {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .sidebar-content {
+        padding: 1rem;
+        overflow-y: auto;
+        height: calc(100vh - 80px);
+      }
+
+      .sidebar-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.5rem;
+        color: #334155;
+        text-decoration: none;
+        transition: background-color 0.2s;
+      }
+
+      .sidebar-item:hover {
+        background-color: #f1f5f9;
+      }
+
+      .sidebar-item.active {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        font-weight: 500;
+      }
+
+      .sidebar-item svg {
+        margin-right: 0.75rem;
+        width: 20px;
+        height: 20px;
+      }
+
+      .sidebar-toggle {
+        position: absolute;
+        top: 1rem;
+        right: -3rem;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 50%;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 60;
+      }
+
+      .main-content {
+        margin-left: 250px;
+        padding: 1.5rem;
+        transition: margin-left 0.3s ease;
+      }
+
+      .main-content-expanded {
+        margin-left: 50px;
+      }
+
+      /* Mobile styles */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+          width: 280px;
+        }
+
+        .sidebar.mobile-open {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 40;
+          display: none;
+        }
+
+        .overlay.active {
+          display: block;
+        }
+
+        .mobile-menu-button {
+          display: block;
+          position: fixed;
+          top: 1rem;
+          left: 1rem;
+          z-index: 30;
+          background-color: white;
+          border-radius: 0.375rem;
+          padding: 0.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-button md:hidden" id="mobileMenuButton">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar custom-scrollbar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="text-xl font-bold text-gray-800">AI CS WhatsApp</h1>
+      </div>
+      <div class="sidebar-toggle" id="sidebarToggle">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </div>
+      <div class="sidebar-content">
+        <a
+          href="/"
+          class="sidebar-item <%= currentPath === '/' ? 'active' : '' %>"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a
+          href="/produk"
+          class="sidebar-item <%= currentPath === '/produk' ? 'active' : '' %>"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Produk</span>
+        </a>
+        <!-- Add more sidebar items as needed -->
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content" id="mainContent"><%- body %></div>
+
+    <script>
+      // Sidebar toggle functionality
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const mobileMenuButton = document.getElementById("mobileMenuButton");
+      const overlay = document.getElementById("overlay");
+
+      // Check if sidebar state is stored in localStorage
+      const sidebarCollapsed =
+        localStorage.getItem("sidebarCollapsed") === "true";
+
+      // Initialize sidebar state
+      if (sidebarCollapsed) {
+        sidebar.classList.add("sidebar-collapsed");
+        mainContent.classList.add("main-content-expanded");
+        sidebarToggle.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            `;
+      }
+
+      // Toggle sidebar on desktop
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("sidebar-collapsed");
+        mainContent.classList.toggle("main-content-expanded");
+
+        const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
+        localStorage.setItem("sidebarCollapsed", isCollapsed);
+
+        // Change toggle icon based on sidebar state
+        if (isCollapsed) {
+          sidebarToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                `;
+        } else {
+          sidebarToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                `;
+        }
+      });
+
+      // Mobile menu functionality
+      mobileMenuButton.addEventListener("click", () => {
+        sidebar.classList.add("mobile-open");
+        overlay.classList.add("active");
+      });
+
+      overlay.addEventListener("click", () => {
+        sidebar.classList.remove("mobile-open");
+        overlay.classList.remove("active");
+      });
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("mobile-open");
+          overlay.classList.remove("active");
+        }
+      });
+    </script>
+  </body>
+</html>
