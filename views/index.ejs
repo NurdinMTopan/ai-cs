@@ -11,26 +11,19 @@
       id="chatContainer"
       class="flex-1 w-full p-3 bg-gray-50 border border-gray-200 rounded-md overflow-y-auto mb-4 flex flex-col gap-3 custom-scrollbar"
     >
-      <% if (history && history.length > 0) { %> <% history.forEach(message => {
-      %> <% if (message.userMessage) { %>
+      <% if (history && history?.length > 0) { %> <% history?.forEach(message =>
+      { %> <% if (message?.userMessage) { %>
       <div class="user-message">
-        <p><%= message.userMessage %></p>
+        <p><%= message?.userMessage %></p>
       </div>
-      <% } %> <% if (message.aiResponse) { %>
+      <% } %> <% if (message?.aiResponse) { %>
       <div class="ai-message">
         <div class="ai-formatted-message" data-raw="<%- message.aiResponse %>">
-          <p><%= message.aiResponse %></p>
+          <p><%= message?.aiResponse %></p>
           <!-- fallback buat non-JS -->
         </div>
       </div>
-      <% } %> <% }); %> <% } else { %>
-      <div class="ai-message">
-        <div class="ai-formatted-message" data-raw="<%- message.aiResponse %>">
-          <p><%= message.aiResponse %></p>
-          <!-- fallback buat non-JS -->
-        </div>
-      </div>
-      <% } %>
+      <% } %> <% }); %> <% } %>
     </div>
 
     <form id="chatForm" class="mb-4">

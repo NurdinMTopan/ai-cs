@@ -5,10 +5,11 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const expressLayouts = require("express-ejs-layouts");
+const fs = require("fs");
 
 const prisma = require("./config/prisma.js");
 const { initializeWhatsApp } = require("./services/whatsappService.js");
-const { getAIResponse } = require("./services/aiService.js");
+const { getAIResponse, editSysMsg } = require("./services/aiService.js");
 
 dotenv.config();
 
@@ -45,6 +46,26 @@ app.get("/", async (req, res) => {
     title: "Dashboard",
     history,
   });
+});
+
+app.get("/system-prompt", async (req, res) => {
+  const sysMsg = fs.readFileSync("./assets/prompt.txt", "utf-8");
+
+  res.render("systemMsg", {
+    title: "System Message",
+    documentTitle: "System Prompt",
+    documentText: sysMsg,
+  });
+});
+
+app.post("/save-prompt", async (req, res) => {
+  try {
+    const { text } = req.body;
+    editSysMsg(text);
+    return res.json({ message: "Success saved system prompt" });
+  } catch (error) {
+    console.log("Can't save system prompt: ", error.message);
+  }
 });
 
 // --- Route for AI Chat Testing (dari halaman index) ---

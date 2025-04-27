@@ -40,7 +40,7 @@ async function initializeWhatsApp() {
     }
 
     // Jangan balas pesan dari diri sendiri (jika bot berjalan di nomor yg sama)
-    if (senderId === client.info.wid._serialized) {
+    if (message.fromMe) {
       console.log("[WhatsApp] Ignoring message from self.");
       return;
     }

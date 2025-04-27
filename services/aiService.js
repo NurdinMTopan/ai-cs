@@ -89,5 +89,22 @@ async function getAIResponse(userMessage, sessionId) {
   }
 }
 
+async function editSysMsg(newText) {
+  try {
+    // Baca isi file yang lama
+    const filePath = "./assets/prompt.txt";
+    const oldContent = fs.readFileSync(filePath, "utf-8");
+
+    // Ganti dengan konten baru (atau bisa juga melakukan manipulasi tertentu)
+    fs.writeFileSync(filePath, newText);
+
+    console.log("System Message berhasil diupdate!");
+    return true;
+  } catch (error) {
+    console.log("Gagal mengedit System Message: ", error.message);
+    return false;
+  }
+}
+
 // Ekspor fungsi menggunakan module.exports
-module.exports = { getAIResponse };
+module.exports = { getAIResponse, editSysMsg };
