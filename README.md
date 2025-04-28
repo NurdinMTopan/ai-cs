@@ -37,7 +37,7 @@ Berikut panduan lengkap untuk mendapatkan API Key dari Google AI Studio (aistudi
 ## Catatan Penting:
 
 - 🔒 **Jangan share API Key** Anda ke publik (termasuk commit ke GitHub)
-- 🆓 Google Gemini API punya **free tier** (60 requests per menit untuk model gemini-pro)
+- 🆓 Google Gemini API punya **free tier** (1500 requests per hari untuk model gemini 2.0 flash)
 - 💸 Jika butuh lebih, bisa upgrade di [Google Cloud Console](https://console.cloud.google.com/)
 
 ## Troubleshooting:
@@ -88,7 +88,7 @@ Butuh bantuan lebih? Cek [dokumen resmi Google](https://ai.google.dev/tutorials/
    Buat file `.env` di root project dan isi dengan:
 
    ```env
-   DATABASE_URL="mysql://root:@localhost:3306/ai_cs_whatsapp_db"  # MongoDB (default)
+   DATABASE_URL="mysql://root:@localhost:3306/ai_cs_whatsapp_db"  # mysql
    GOOGLE_API_KEY="your-google-genai-api-key"  # Untuk Gemini
    PORT="3000"  # Opsional untuk PORT
    ```
